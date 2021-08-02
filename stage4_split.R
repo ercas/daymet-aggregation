@@ -35,7 +35,7 @@ split_csv <- function(path,
   } else if (file.size(path) < max_split_size) {
     message("Input path is already less than max split size")
     system(sprintf("ln \"%s\" \"%s\"", path, first_file))
-    message(sprintf("Created hard link %s -> %s", first_file, path))
+    message(sprintf("* Created hard link %s -> %s", first_file, path))
   } else {
     message(sprintf("Splitting: %s -> %s", path, output_template))
     message("(1/3) Reading data")
@@ -93,21 +93,18 @@ parts <- as.data.table(unglue_data(
   "output/aggregated-combined/{geography}/{aggregation}_{measure}.csv.gz"
 ))[, path := paths]
 
-sapply(
-  unique(parts$geography),
-  function(geography) {
-    dir.create(file.path(output_directory, geography), showWarnings = FALSE, recursive = TRUE)
-  }
-)
-
+dir.create(output_directory, showWarnings = FALSE, recursive = TRUE)
+    
 for (i in 1:nrow(parts)) {
   part <- parts[i,]
   split_csv(
     part$path,
     file.path(
       output_directory,
-      part$geography,
-      gsub(".csv.gz", "_part{split_number}.csv.gz", basename(part$path))
+      sprintf(
+        "%s_%s_%s_part{split_number}.csv.gz",
+        part$geography, part$aggregation, part$measure
+      )
     )
   )
 }
