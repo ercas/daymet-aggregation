@@ -100,7 +100,7 @@ sapply(
   }
 )
 
-for (i in nrow(parts)) {
+for (i in 1:nrow(parts)) {
   part <- parts[i,]
   split_csv(
     part$path,
