@@ -48,7 +48,7 @@ split_csv <- function(path,
       by = (actual_sample_max_lines - sample_min_lines) / sample_n
     )
     
-    message("Sampling random lines: ", appendLF = FALSE)
+    message("* Sampling random lines: ", appendLF = FALSE)
     sample_sizes <- sapply(
       sample_lines,
       function(lines) {
