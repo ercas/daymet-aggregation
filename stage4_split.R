@@ -101,9 +101,10 @@ for (i in 1:nrow(parts)) {
     part$path,
     file.path(
       output_directory,
+      part$geography,
       sprintf(
-        "%s_%s_%s_part{split_number}.csv.gz",
-        part$geography, part$aggregation, part$measure
+        "%s_%s_part{split_number}.csv.gz",
+        part$aggregation, part$measure
       )
     )
   )
