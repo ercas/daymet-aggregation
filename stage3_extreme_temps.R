@@ -28,7 +28,6 @@ parts <- as.data.table(unglue_data(
   "output/aggregated-combined/{geography}/{aggregation}_{measure}.csv.gz"
 ))[, path := paths][aggregation == "mean"]
 
-
 for (current_geography in unique(parts$geography)) {
   output_directory <- sprintf("output/extra/%s", current_geography)
   dir.create(output_directory, showWarnings = FALSE, recursive = TRUE)
