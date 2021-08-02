@@ -43,8 +43,8 @@ R packages:
 
 * `raster` and `sf`: Used to translate shapefiles to the Daymet spatial
   reference system.
-* `data.table` and `unglue`: Used in stages after the initial aggregation to do
-  additional aggregation and joining.
+* `data.table`, `glue`, and `unglue`: Used in stages after the initial
+  aggregation to do additional aggregation / joining / splitting.
 
 # Subdirectories
 
@@ -63,9 +63,16 @@ new data instead, as the new data is both cleaner and smaller.
   `output/aggregated/` into larger files that are easier to process but take up
   much more memory.
 
+* `output/aggregated-combined-distrib/`: The contents of
+  `output/aggregated-combined/` split into smaller parts for distribution on
+  Harvard Dataverse.
+
 * `output/extra/`: Extra data that are not just `exactextract` output or
-  transformations of it. This subdirectory contains additional *generated* data,
-  such as extreme weather and hot/cold wave indicators.
+  transformations of it. This subdirectory contains additional **generated**
+  data, such as extreme temperature and hot/cold wave indicators.
+
+* `output/extra-distrib/`: The contents of `output/extra`, packaged into ZIP
+  archives for distribution on Harvard Dataverse.
 
 `rawdata/`: Directory where raw Daymet data is stored.
 
