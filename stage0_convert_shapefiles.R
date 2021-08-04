@@ -24,7 +24,7 @@ conversions <- list(
   c(
     input_file = "/media/qnap3/ShapeFiles/Polygons/TIGER2010/zcta5/tl_2010_us_zcta510.shp",
     output_file = "shapefiles/zcta5_2010.shp",
-    id_column = "ZCTA5CE10"
+    id_column = "GEOID10"
   ),
   
   # Counties
