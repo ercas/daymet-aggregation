@@ -24,7 +24,9 @@ unfinished <- as.data.table(unglue_data(
   "output/aggregated/{geography}/{measure}_{year}.csv"
 ))[, list(geography, measure)][, unfinished := TRUE]
 
+print("1")
 parts <- unfinished[parts, on = list(geography, measure)][is.na(unfinished)]
+parts <- parts[geography != "block_groups_2010"]
 
 # Read and transform output from aggregate.sh
 read_part <- function(path, subset_to_aggregation = NA, verbose = TRUE) {
