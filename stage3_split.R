@@ -93,10 +93,13 @@ parts <- as.data.table(unglue_data(
   "output/aggregated-combined/{geography}/{aggregation}_{measure}.csv.gz"
 ))[, path := paths]
 
-dir.create(output_directory, showWarnings = FALSE, recursive = TRUE)
-    
 for (i in 1:nrow(parts)) {
   part <- parts[i,]
+  dir.create(
+    file.path(output_directory, part$geography),
+    showWarnings = FALSE,
+    recursive = TRUE
+  )
   split_csv(
     part$path,
     file.path(
