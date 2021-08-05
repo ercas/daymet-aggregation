@@ -25,8 +25,10 @@ unfinished <- as.data.table(unglue_data(
 ))[, list(geography, measure)][, unfinished := TRUE]
 
 print("1")
-parts <- unfinished[parts, on = list(geography, measure)][is.na(unfinished)]
+parts <- unfinished[parts, on = list(geography, measure), allow.cartesian = TRUE][is.na(unfinished)]
+print("2")
 parts <- parts[geography != "block_groups_2010"]
+parts <- parts[geography != "block_groups_2000"]
 
 # Read and transform output from aggregate.sh
 read_part <- function(path, subset_to_aggregation = NA, verbose = TRUE) {
@@ -105,7 +107,9 @@ for (current_geography in unique(parts$geography)) {
         data <- rbindlist(data)
         
         message(sprintf("Writing to %s", output_file))
-        fwrite(data, output_file)
+        if (nrow(data) > 1) {
+          fwrite(data, output_file)
+        }
       }
     }
   }
