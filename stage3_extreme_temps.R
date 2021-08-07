@@ -45,7 +45,10 @@ for (current_geography in unique(parts$geography)) {
     file.exists
   ))) {
     message(sprintf("Skipping: %s", current_geography))
-  } else {
+  } else if (
+    nrow(parts[geography == current_geography & measure == "tmax"]) > 0 &
+    nrow(parts[geography == current_geography & measure == "tmin"]) > 0
+  ) {
     message(sprintf("Processing: %s", current_geography))
     
     # Read data ----
