@@ -18,15 +18,13 @@ parts <- as.data.table(unglue_data(
 # Unfinished aggregations will have uncompressed CSV files in them - we need to
 # remove these directories from `parts` so as to not generate incomplete
 # combined data
-unfinished_paths <- Sys.glob("output/aggregated/*/*.csv")
-unfinished <- as.data.table(unglue_data(
-  unfinished_paths,
-  "output/aggregated/{geography}/{measure}_{year}.csv"
-))[, list(geography, measure)][, unfinished := TRUE]
-
-print("1")
-parts <- unfinished[parts, on = list(geography, measure), allow.cartesian = TRUE][is.na(unfinished)]
-print("2")
+# unfinished_paths <- Sys.glob("output/aggregated/*/*.csv")
+# unfinished <- as.data.table(unglue_data(
+#   unfinished_paths,
+#   "output/aggregated/{geography}/{measure}_{year}.csv"
+# ))[, list(geography, measure)][, unfinished := TRUE]
+# 
+# parts <- unfinished[parts, on = list(geography, measure), allow.cartesian = TRUE][is.na(unfinished)]
 parts <- parts[geography != "block_groups_2010"]
 parts <- parts[geography != "block_groups_2000"]
 
