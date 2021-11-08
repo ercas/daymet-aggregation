@@ -17,20 +17,29 @@
 import csv
 import datetime
 import gzip
+import os
 import typing
 
 import tqdm
 
+
+DEFAULT_INPUT_FILENAME = "extreme_temp_days.csv.gz"
+DEFAULT_OUTPUT_FILENAME = "extreme_temp_waves.csv.gz"
+
+
 def detect_id_column(path: str) -> str:
     with gzip.open(path, "rt") as input_fp:
         return next(csv.reader(input_fp))[0]
+
 
 def extract_waves(input_path: str,
                   output_path: str,
                   id_field: str,
                   output_fieldnames: typing.List[str]
                   ) -> None:
-    with gzip.open(input_path, "rt") as input_fp, gzip.open(output_path, "wt") as output_fp:
+    temp_path = output_path + ".temp"
+
+    with gzip.open(input_path, "rt") as input_fp, gzip.open(temp_path, "wt") as output_fp:
         reader = csv.DictReader(input_fp)
         writer = csv.DictWriter(output_fp, fieldnames=output_fieldnames)
 
@@ -77,7 +86,7 @@ def extract_waves(input_path: str,
                             "wave_index": i + 1,
                             "wave_length": wave_length
                         }
-                        print(result)
+                        #print(result)
                         writer.writerow(result)
                 date_stack = []
 
@@ -85,18 +94,11 @@ def extract_waves(input_path: str,
             previous_id = this_id
             previous_extreme = this_extreme
 
-if __name__ == "__main__":
-    import argparse
+    os.rename(temp_path, output_path)
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("input")
-    parser.add_argument("-o", "--output", default=None)
-    args = parser.parse_args()
 
-    id_field = detect_id_column(args.input)
-
-    if not args.output:
-        args.output = "extreme_temp_waves.csv.gz"
+def extract_waves_wrapper(input_path: str, output_path: str) -> None:
+    id_field = detect_id_column(input_path)
 
     output_fieldnames = [
         id_field, "year", "month", "day", "extreme", "wave_id", "wave_index",
@@ -104,5 +106,43 @@ if __name__ == "__main__":
     ]
 
     extract_waves(
-        args.input, args.output, id_field, output_fieldnames
+        input_path, output_path, id_field, output_fieldnames
     )
+
+
+if __name__ == "__main__":
+    import argparse
+    import glob
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input", nargs="?", default=None)
+    parser.add_argument("-o", "--output", default=None)
+    args = parser.parse_args()
+
+
+    if not args.output:
+        args.output = DEFAULT_OUTPUT_FILENAME
+
+    # input given: convert the given file
+    if args.input:
+        extract_waves_wrapper(args.input, args.output)
+
+    # no input given: determine what files need to be converted by looking for
+    # missing files in the expected daymet-aggregation output directory
+    # hierarchy
+    else:
+        extra_directories = glob.glob("output/extra/*")
+        for extra_directory in extra_directories:
+            files = os.listdir(extra_directory)
+            input_path = os.path.join(extra_directory, DEFAULT_INPUT_FILENAME)
+            output_path = os.path.join(extra_directory, DEFAULT_OUTPUT_FILENAME)
+            if os.path.isfile(output_path):
+                print("Skipping {}".format(extra_directory))
+            else:
+                if os.path.isfile(input_path):
+                    print("Generating {}".format(output_path))
+                    extract_waves_wrapper(input_path, output_path)
+                else:
+                    print("ERROR: {} is missing".format(input_path))
+                    continue
+
