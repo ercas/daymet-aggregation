@@ -60,7 +60,7 @@ for (current_geography in unique(parts$geography)) {
     # with no delimiter
     tmax[, year := floor(date / 1e4)]
     tmax[, month := floor((date / 1e4 - year) * 1e2)]
-    tmax[, day := (date / 100 - floor(date / 100)) * 100]
+    tmax[, day := as.integer((date / 100 - floor(date / 100)) * 100)]
     
     # Guess the ID column (should be the first column) and rename it (syntactically
     # inconvenient to use variables in data.table `by` argument)
@@ -90,7 +90,7 @@ for (current_geography in unique(parts$geography)) {
     }
     
     if (file.exists(output_tmin_quantiles)) {
-      message("( 4/10 Skipped")
+      message("( 4/10) Skipped")
       tmin_agg <- fread(output_tmin_quantiles)
     } else {
       message("( 4/10) Calculating tmin 1st and 99th percentiles")
@@ -98,7 +98,7 @@ for (current_geography in unique(parts$geography)) {
                            tmin_pctile99 = quantile(value, 0.99, na.rm = TRUE)),
                        by = list(id, year)]
       setnames(tmin_agg, "id", id_column)
-      fwrite(tmax_agg, output_tmin_quantiles)
+      fwrite(tmin_agg, output_tmin_quantiles)
     }
     
     # Back to "id" for joining later
@@ -108,43 +108,48 @@ for (current_geography in unique(parts$geography)) {
     # Hot and cold weather indicators ----
     
     if (file.exists(output_extreme_temps)) {
-      message("( 5/10 Skipped")
-      message("( 6/10 Skipped")
-      message("( 7/10 Skipped")
+      message("( 5/10) Skipped")
+      message("( 6/10) Skipped")
+      message("( 7/10) Skipped")
     } else {
       message("( 5/10) Generating extreme cold indicators")
       cold <- tmax[tmax_agg, on = list(id, year)
                    ][value <= tmax_pctile01
                     ][, list(id, year, month, day)
-                     ][, extreme := "cold"]
+                     ][, extreme := "cold"
+                      ][order(id, year, month, day)]
       setnames(cold, "id", id_column)
       
       message("( 6/10) Generating extreme heat indicators")
       hot <- tmin[tmin_agg, on = list(id, year)
                   ][value >= tmin_pctile99
                    ][, list(id, year, month, day)
-                    ][, extreme := "hot"]
+                    ][, extreme := "hot"
+                     ][order(id, year, month, day)]
       setnames(hot, "id", id_column)
       
       message("( 7/10) Writing extreme weather indicators")
       fwrite(rbindlist(list(cold, hot)), output_extreme_temps)
     }
     
-    # Hot and cold wave indicators ----
+    # Hot and cold wave and singleton extreme weather day indicators ----
     
     if (file.exists(output_extreme_temp_waves)) {
-      message("( 8/10 Skipped")
-      message("( 9/10 Skipped")
-      message("(10/10 Skipped")
+      message("( 8/10) Skipped")
+      message("( 9/10) Skipped")
+      message("(10/10) Skipped")
     } else {
       message("( 8/10) Generating cold wave indicators")
+      cold_waves <- tmax[tmax_agg, on = list(id, year)]
+      cold_waves
       cold_waves <- tmax[tmax_agg, on = list(id, year)
                          ][, `:=` (this_day_cold = value <= tmax_pctile01,
                                    next_day_cold = shift(value, 1) <= tmax_pctile01,
                                    prev_day_cold = shift(value, -1) <= tmax_pctile01)
                           ][(this_day_cold == TRUE & next_day_cold == TRUE) | (this_day_cold == TRUE & prev_day_cold == TRUE)
                            ][, list(id, year, month, day)
-                            ][, extreme_wave := "cold"]
+                            ][, extreme_wave := "cold"
+                             ][order(id, year, month, day)]
       setnames(cold_waves, "id", id_column)
       
       message("( 9/10) Generating heat wave indicators")
@@ -154,7 +159,8 @@ for (current_geography in unique(parts$geography)) {
                                    prev_day_hot = shift(value, -1) >= tmin_pctile99)
                           ][(this_day_hot == TRUE & next_day_hot == TRUE) | (this_day_hot == TRUE & prev_day_hot == TRUE)
                            ][, list(id, year, month, day)
-                            ][, extreme_wave := "hot"]
+                            ][, extreme_wave := "hot"
+                             ][order(id, year, month, day)]
       setnames(heat_waves, "id", id_column)
                 
       message("(10/10) Writing heat wave indicators")
