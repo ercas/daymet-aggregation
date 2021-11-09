@@ -54,7 +54,7 @@ def extract_waves(input_path: str,
 
         wave_id = 0
 
-        for line in reader:
+        for line in tqdm.tqdm(reader, desc="Parsed", unit=" rows"):
             this_date = datetime.datetime(
                 int(line["year"]),
                 int(line["month"]),
