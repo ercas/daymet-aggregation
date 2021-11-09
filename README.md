@@ -46,6 +46,11 @@ R packages:
 * `data.table`, `glue`, and `unglue`: Used in stages after the initial
   aggregation to do additional aggregation / joining / splitting.
 
+Python libraries:
+
+* `tqdm`: Used as a command-line progress bar and as a progress indicator in
+  the Python scripts.
+
 # Subdirectories
 
 `deprecated/`: Old code and generated data, for reference. The old aggregated
@@ -83,17 +88,22 @@ to convert between spatial reference systems.
 
 # Date transformations
 
-Due to limitations on `exactextract` output column names, dates will be
-represented in ISO 8601 date format **without delimiters**, i.e. YYYYMMDD. The
-size of the data can make parsing years, months, and days out of this format via
-type conversion + substring extraction or a date parsing library very slow; it
-is recommended to make use of algebra and the `floor()` function in base R to
-parse out date components instead. See below for an example:
+Due to limitations on `exactextract` output column names, dates in the core
+output files will be represented in ISO 8601 date format **without
+delimiters**, i.e. YYYYMMDD. The size of the data can make parsing years,
+months, and days out of this format via type conversion + substring extraction
+or a date parsing library very slow; it is recommended to make use of algebra
+and the `floor()` function in base R to parse out date components instead. See
+below for an example:
 
 ```r
 library(data.table)
 data <- fread("output/aggregated-combined/zcta5_2010/mean_tmax.csv.gz")
 data[, year := floor(date / 1e4)]
 data[, month := floor((date / 1e4 - year) * 1e2)]
-data[, day := (date / 1e2 - floor(date / 1e2)) * 1e2]
+data[, day := as.integer((date / 1e2 - floor(date / 1e2)) * 1e2)]
 ```
+
+In other output files, such as those in the `output/extra/` and
+`output/extra-distrib/` directories, dates may be split into year, month, and
+day components.
