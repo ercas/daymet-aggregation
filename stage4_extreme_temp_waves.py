@@ -49,7 +49,6 @@ def extract_waves(input_path: str,
 
         date_stack = []
 
-        header = next(reader)
         writer.writeheader()
 
         wave_id = 0
@@ -63,36 +62,50 @@ def extract_waves(input_path: str,
             this_id = line[id_field]
             this_extreme = line["extreme"]
 
-            difference = (this_date - previous_date).days
-
-            if (this_id == previous_id) and (difference == 1):
-                # if len(date_stack) == 0:
-                #     date_stack.append(previous_date)
-                date_stack.append(this_date)
-
-            else:
-                # dump the stack
+            # if the ID changes or there is a gap of more than a day, dump the
+            # stack
+            if (
+                (this_id != previous_id)
+                or ((this_date - previous_date).days > 1)
+            ):
                 wave_length = len(date_stack)
                 if wave_length > 0:
                     wave_id += 1
                     for (i, date) in enumerate(date_stack):
                         result = {
-                            id_field: this_id,
+                            id_field: previous_id,
                             "year": date.year,
                             "month": date.month,
                             "day": date.day,
-                            "extreme": this_extreme,
+                            "extreme": previous_extreme,
                             "wave_id": wave_id,
                             "wave_index": i + 1,
                             "wave_length": wave_length
                         }
-                        #print(result)
                         writer.writerow(result)
                 date_stack = []
+
+            # grow the stack
+            date_stack.append(this_date)
 
             previous_date = this_date
             previous_id = this_id
             previous_extreme = this_extreme
+
+        # dump last stack
+        for (i, date) in enumerate(date_stack):
+            result = {
+                id_field: previous_id,
+                "year": date.year,
+                "month": date.month,
+                "day": date.day,
+                "extreme": previous_extreme,
+                "wave_id": wave_id,
+                "wave_index": i + 1,
+                "wave_length": wave_length
+            }
+            #print(result)
+            writer.writerow(result)
 
     os.rename(temp_path, output_path)
 
