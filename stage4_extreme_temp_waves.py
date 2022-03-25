@@ -58,7 +58,7 @@ def extract_waves(input_path: str,
             this_date = datetime.datetime(
                 int(line["year"]),
                 int(line["month"]),
-                int(float(line["day"]) + 0.5)
+                int(line["day"])
             )
             this_id = line[id_field]
             this_extreme = line["extreme"]
@@ -78,9 +78,9 @@ def extract_waves(input_path: str,
                     for (i, date) in enumerate(date_stack):
                         result = {
                             id_field: this_id,
-                            "year": line["year"],
-                            "month": line["month"],
-                            "day": line["day"],
+                            "year": date.year,
+                            "month": date.month,
+                            "day": date.day,
                             "extreme": this_extreme,
                             "wave_id": wave_id,
                             "wave_index": i + 1,
