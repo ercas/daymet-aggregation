@@ -60,7 +60,7 @@ for (current_geography in unique(parts$geography)) {
     # with no delimiter
     tmax[, year := floor(date / 1e4)]
     tmax[, month := floor((date / 1e4 - year) * 1e2)]
-    tmax[, day := as.integer((date / 100 - floor(date / 100)) * 100)]
+    tmax[, day := date - (floor(date / 1e2) * 1e2)]
     
     # Guess the ID column (should be the first column) and rename it (syntactically
     # inconvenient to use variables in data.table `by` argument)
@@ -72,7 +72,7 @@ for (current_geography in unique(parts$geography)) {
     tmin <- fread(parts[geography == current_geography & measure == "tmax"]$path)
     tmin[, year := floor(date / 1e4)]
     tmin[, month := floor((date / 1e4 - year) * 1e2)]
-    tmin[, day := (date / 1e2 - floor(date / 1e2)) * 1e2]
+    tmin[, day := date - (floor(date / 1e2) * 1e2)]
     setnames(tmin, id_column, "id") # Should be same ID column
     
     # Generate quantiles ----
