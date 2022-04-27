@@ -265,13 +265,18 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--tmin-quantiles", default=None)
     parser.add_argument("-c", "--tmin-cutoff-quantile", default=99, type=int)
     parser.add_argument("-o", "--output", default=None)
+    parser.add_argument("-a", "--auto", default=None)
     args = parser.parse_args()
 
     if not args.output:
         args.output = DEFAULT_OUTPUT_FILENAME
 
     # Input given: convert the given file
-    if args.tmax:
+    if all([
+        args.tmax, args.tmax_quantiles, args.tmax_cutoff_quantile,
+        args.tmax, args.tmax_quantiles, args.tmin_cutoff_quantile,
+        args.output
+    ]):
         extract_extremes(
             tmax_path=args.tmax,
             cold_cutoffs_tmax=extract_quantiles(args.tmax_quantiles, args.tmax_cutoff_quantile),
@@ -285,7 +290,11 @@ if __name__ == "__main__":
     # missing files in the expected daymet-aggregation output directory
     # hierarchy
     else:
-        extra_directories = glob.glob("output/extra/*")
+        # If args.auto is given: use that as the only extra_directories
+        if args.auto:
+            extra_directories = [args.auto]
+        else:
+            extra_directories = glob.glob("output/extra/*")
         for extra_directory in extra_directories:
             tmax_path = os.path.join(
                 extra_directory.replace("extra", "aggregated-combined"),
