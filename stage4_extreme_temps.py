@@ -159,7 +159,7 @@ def extract_quantiles(input_path: str,
     with gzip.open(input_path, "rt") as input_fp:
         reader = csv.DictReader(input_fp)
         id_field = reader.fieldnames[0]
-        for line in reader:
+        for line in tqdm.tqdm(reader, desc="Reading {}".format(input_path)):
             result[line["year"]][line[id_field]] = float(line[quantile_field])
     return result
 
