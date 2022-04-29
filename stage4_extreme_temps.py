@@ -328,7 +328,7 @@ if __name__ == "__main__":
                     )
                 )
                 if os.path.isfile(output_path):
-                    print("Skipping {}".format(extra_directory))
+                    print("Skipping {}".format(output_path))
                 else:
                     print("Generating {}".format(output_path))
                     extract_extremes(
