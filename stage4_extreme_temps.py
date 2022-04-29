@@ -23,12 +23,18 @@ import typing
 
 import tqdm
 
-
 DEFAULT_TMAX_FILENAME = "mean_tmax.csv.gz"
 DEFAULT_TMIN_FILENAME = "mean_tmin.csv.gz"
 DEFAULT_TMAX_QUANTILES_FILENAME = "tmax_quantiles.csv.gz"
 DEFAULT_TMIN_QUANTILES_FILENAME = "tmin_quantiles.csv.gz"
-DEFAULT_OUTPUT_FILENAME = "extreme_temps.csv.gz"
+DEFAULT_OUTPUT_FILENAME_TEMPLATE = "extreme_temps_pctile{:02d}_pctile{:02d}.csv.gz"
+DEFAULT_CUTOFF_QUANTILES = [
+    (1, 99),
+    (3, 97),
+    (5, 95),
+    (10, 90),
+    (15, 85)
+]
 
 
 class ExtremeWaveDetector:
@@ -253,6 +259,7 @@ def extract_extremes(tmax_path: str,
 
     os.rename(temp_path, output_path)
 
+
 if __name__ == "__main__":
     import argparse
     import glob
@@ -265,11 +272,8 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--tmin-quantiles", default=None)
     parser.add_argument("-c", "--tmin-cutoff-quantile", default=99, type=int)
     parser.add_argument("-o", "--output", default=None)
-    parser.add_argument("-a", "--auto", default=None)
+    parser.add_argument("-a", "--autofill-args", default=None)
     args = parser.parse_args()
-
-    if not args.output:
-        args.output = DEFAULT_OUTPUT_FILENAME
 
     # Input given: convert the given file
     if all([
@@ -285,14 +289,13 @@ if __name__ == "__main__":
             output_path=args.output
         )
 
-
     # No input given: determine what files need to be converted by looking for
     # missing files in the expected daymet-aggregation output directory
     # hierarchy
     else:
         # If args.auto is given: use that as the only extra_directories
-        if args.auto:
-            extra_directories = [args.auto]
+        if args.autofill_args:
+            extra_directories = [args.autofill_args]
         else:
             extra_directories = glob.glob("output/extra/*")
         for extra_directory in extra_directories:
@@ -306,7 +309,6 @@ if __name__ == "__main__":
             )
             cold_cutoffs_tmax = os.path.join(extra_directory, DEFAULT_TMAX_QUANTILES_FILENAME)
             hot_cutoffs_tmin = os.path.join(extra_directory, DEFAULT_TMIN_QUANTILES_FILENAME)
-            output_path = os.path.join(extra_directory, DEFAULT_OUTPUT_FILENAME)
 
             for path in [
                 tmax_path,
@@ -315,16 +317,24 @@ if __name__ == "__main__":
                 hot_cutoffs_tmin
             ]:
                 if not os.path.isfile(path):
-                    raise Exception("ERROR: {} is missing".format(path))
+                    raise Exception("ERROR: {} does not exist".format(path))
 
-            if os.path.isfile(output_path):
-                print("Skipping {}".format(extra_directory))
-            else:
-                print("Generating {}".format(output_path))
-                extract_extremes(
-                    tmax_path=tmax_path,
-                    cold_cutoffs_tmax=extract_quantiles(cold_cutoffs_tmax, args.tmax_cutoff_quantile),
-                    tmin_path=tmin_path,
-                    hot_cutoffs_tmin=extract_quantiles(hot_cutoffs_tmin, args.tmin_cutoff_quantile),
-                    output_path=output_path
+            for tmax_cutoff_quantile, tmin_cutoff_quantile in DEFAULT_CUTOFF_QUANTILES:
+                output_path = os.path.join(
+                    extra_directory,
+                    DEFAULT_OUTPUT_FILENAME_TEMPLATE.format(
+                        tmax_cutoff_quantile,
+                        tmin_cutoff_quantile
+                    )
                 )
+                if os.path.isfile(output_path):
+                    print("Skipping {}".format(extra_directory))
+                else:
+                    print("Generating {}".format(output_path))
+                    extract_extremes(
+                        tmax_path=tmax_path,
+                        cold_cutoffs_tmax=extract_quantiles(cold_cutoffs_tmax, tmax_cutoff_quantile),
+                        tmin_path=tmin_path,
+                        hot_cutoffs_tmin=extract_quantiles(hot_cutoffs_tmin, tmin_cutoff_quantile),
+                        output_path=output_path
+                    )
