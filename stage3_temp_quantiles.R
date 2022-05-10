@@ -1,21 +1,6 @@
 #!/usr/bin/env Rscript
 #
-# Generate extreme temperature indicators in accordance with: Schwartz, J.
-# (2005). Who is Sensitive to Extremes of Temperature?: A Case-Only Analysis.
-# Epidemiology, 16(1), 67–72. https://doi.org/10.1097/01.ede.0000147114.25957.71
-# Schwartz gives the following definitions for extreme temperature days:
-#
-# * Hot: >= 99th pctile of tmin
-# * Cold: <= 1st pctile of tmax
-#
-# Slight modification: percentiles have been calculated on a yearly basis to
-# take shifts of percentiles over time due to climate change into account -
-# otherwise cold days may be overrepresented in older years and hot days
-# overrepresented in more recent years
-#
-# This script also generates heat waves and cold waves, defined as two or more
-# consecutive days with extreme heat/cold. Each day in the hot/cold wave will be
-# marked as a hot/cold wave day.
+# Generate percentiles 0-100 of tmax and tmin files.
 #
 # Contact: Edgar Castro <edgar_castro@g.harvard.edu>
 
