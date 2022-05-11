@@ -23,13 +23,30 @@ each stage are designed to be run separately before proceeding to the next
 stage. Refer to the documentation at the top of each script for specific usage
 instructions.
 
+# High- vs low-memory scripts
+
+For many scripts, there exists both high- and low-memory versions depending on
+what resources are available.
+
+The high-memory scripts are written in R and use the `data.table` library to
+carry out procedures very quickly, but these scripts require that the entire
+data set be loaded into memory. This may require up to ~70 GB of RAM,
+especially for aggregating and generating `tmean` in stage 3.
+
+The low-memory scripts are written in Python and take advantage of not needing
+to load the entire data set to perform the necessary procedures. In particular,
+the data files produced by `exactextract` are already ordered by date and all
+of those files within the same geographic level also have the same order of
+geographic identifiers. The Python scripts take advantage of this by using a
+stack-based approach that flushes periodically once the required information is
+collected.
+
 # Requirements
 
 System requirements:
 
 * ~3.5 TB of space (for storing both raw Daymet data and generated data for a
   few geographies)
-* ~70 GB of RAM (for aggregating, especially in stage 3)
 
 Command-line utilities:
 
@@ -50,6 +67,7 @@ Python libraries:
 
 * `tqdm`: Used as a command-line progress bar and as a progress indicator in
   the Python scripts.
+* `numpy`: For the low-memory Python scripts.
 
 # Subdirectories
 
