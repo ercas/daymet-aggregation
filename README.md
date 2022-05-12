@@ -33,13 +33,13 @@ carry out procedures very quickly, but these scripts require that the entire
 data set be loaded into memory. This may require up to ~70 GB of RAM,
 especially for aggregating and generating `tmean` in stage 3.
 
-The low-memory scripts are written in Python and take advantage of not needing
-to load the entire data set to perform the necessary procedures. In particular,
-the data files produced by `exactextract` are already ordered by date and all
-of those files within the same geographic level also have the same order of
-geographic identifiers. The Python scripts take advantage of this by using a
-stack-based approach that flushes periodically once the required information is
-collected.
+The low-memory scripts are written in Python or Julia and take advantage of not
+needing to load the entire data set to perform the necessary procedures. In
+particular, the data files produced by `exactextract` are already ordered by
+date and all of those files within the same geographic level also have the same
+order of geographic identifiers. The Python scripts take advantage of this by
+using a stack-based approach that flushes periodically once the required
+information is collected.
 
 # Requirements
 
