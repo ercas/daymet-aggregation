@@ -52,7 +52,7 @@ if all(values(args) .!= nothing)
 else
     for geography_name in readdir("output/aggregated-combined/")
         aggregated_directory = "output/aggregated-combined/$geography_name"       
-        extra_directory = "output/aggregated-combined/$geography_name"
+        extra_directory = "output/extra/$geography_name"
 
         if ! isdir(aggregated_directory)
             continue
