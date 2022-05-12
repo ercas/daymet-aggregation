@@ -66,8 +66,8 @@ else
         end
         
         if ! isdir(extra_directory)
-            mkdir(extra_directory
-        )
+            mkdir(extra_directory)
+        end
         
         if isfile(tmean_path)
             println("Skipping $tmean_path")
