@@ -52,11 +52,7 @@ if all(values(args) .!= nothing)
 else
     for geography_name in readdir("output/aggregated-combined/")
         aggregated_directory = "output/aggregated-combined/$geography_name"       
-        extra_directory = "output/aggregated-combined/$geography_name"
-        
-        if isdir(aggregated_directory)
-            continue
-        end
+        extra_directory = "output/aggregated-combined/$geography_name"=
     
         tmax_path = "$aggregated_directory/$DEFAULT_TMAX_FILENAME"
         tmin_path = "$aggregated_directory/$DEFAULT_TMIN_FILENAME"
@@ -64,9 +60,14 @@ else
         
         for file in [tmax_path, tmin_path]
             if ! isfile(file)
-                throw(ErrorException("File $file does not exist"))
+                println("Error: File $file does not exist")
+                continue
             end
         end
+        
+        if ! isdir(extra_directory)
+            mkdir(extra_directory
+        )
         
         if isfile(tmean_path)
             println("Skipping $tmean_path")
