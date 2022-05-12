@@ -52,7 +52,11 @@ if all(values(args) .!= nothing)
 else
     for geography_name in readdir("output/aggregated-combined/")
         aggregated_directory = "output/aggregated-combined/$geography_name"       
-        extra_directory = "output/aggregated-combined/$geography_name"=
+        extra_directory = "output/aggregated-combined/$geography_name"
+
+        if ! isdir(aggregated_directory)
+            continue
+        end
     
         tmax_path = "$aggregated_directory/$DEFAULT_TMAX_FILENAME"
         tmin_path = "$aggregated_directory/$DEFAULT_TMIN_FILENAME"
